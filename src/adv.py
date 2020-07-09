@@ -57,6 +57,7 @@ def input_parser(error):
     }
 
     user_input = input("Enter a command: ")
+    user_input = user_input.lower()
 
     if user_input in commands:
         return commands[user_input]
