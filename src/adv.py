@@ -1,6 +1,7 @@
 import os
 from room import Room
 from player import Player
+from item import Item
 
 # Declare all the rooms
 
@@ -30,6 +31,10 @@ earlier adventurers. The only exit is to the south.""",
     ),
 }
 
+# Add items to rooms
+room["outside"].items = [
+    Item("rusty sword", "This sword looks like it hasn't seen use in ages!")
+]
 
 # Link rooms together
 
@@ -54,6 +59,7 @@ def input_parser(error):
         "s": "s_to",
         "e": "e_to",
         "w": "w_to",
+        "search": "search",
     }
 
     user_input = input("Enter a command: ")
@@ -65,15 +71,34 @@ def input_parser(error):
         return error
 
 
+def search_room(room):
+    os.system("clear")
+    for item in room.items:
+        print(item)
+
+
 # Make a new player object that is currently in the 'outside' room.
 player_name = input("Enter a name for your player: ")
 player = Player(player_name, room["outside"])
 
+player.items = [
+    Item("rusty sword", "This sword looks like it hasn't seen use in ages!")
+]
+
+
 os.system("clear")
+
+search_room(player)
 
 # Write a loop that:
 while True:
     error_message = "Command does not exist."
+    directions = [
+        "n_to",
+        "s_to",
+        "e_to",
+        "w_to",
+    ]
 
     # * Prints the current room name and description
     print(player.current_room.name)
@@ -93,11 +118,17 @@ while True:
 
         os.system("clear")
 
-        target_room = getattr(player.current_room, user_input)
+        # If the user enters "search", list all items in the room
+        if user_input == "search":
+            search_room(player.current_room)
 
-        # If the user enters a cardinal direction, attempt to move to the room there.
-        if target_room == False:
-            # Print an error message if the movement isn't allowed.
-            print("Dead end. Returning back to previous room...")
-        else:
-            player.current_room = target_room
+        for direction in directions:
+            if direction == user_input:
+                target_room = getattr(player.current_room, user_input)
+
+                # If the user enters a cardinal direction, attempt to move to the room there.
+                if target_room == False:
+                    # Print an error message if the movement isn't allowed.
+                    print("Dead end. Returning back to previous room...")
+                else:
+                    player.current_room = target_room
