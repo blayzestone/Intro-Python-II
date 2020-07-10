@@ -32,9 +32,10 @@ earlier adventurers. The only exit is to the south.""",
 }
 
 # Add items to rooms
-room["outside"].items = [
-    Item("rusty sword", "This sword looks like it hasn't seen use in ages!")
-]
+room["outside"].items = {
+    "sword": Item("sword", "This sword looks like it hasn't seen use in ages!"),
+    "shield": Item("shield", "A wooden shield with a gaping hole."),
+}
 
 # Link rooms together
 
@@ -55,6 +56,7 @@ room["treasure"].s_to = room["narrow"]
 def input_parser(error):
     commands = {
         "q": "q",
+        "o": "o",
         "n": "n_to",
         "s": "s_to",
         "e": "e_to",
@@ -65,6 +67,9 @@ def input_parser(error):
     user_input = input("Enter a command: ")
     user_input = user_input.lower()
 
+    if "add" in user_input:
+        return user_input
+
     if user_input in commands:
         return commands[user_input]
     else:
@@ -74,21 +79,14 @@ def input_parser(error):
 def search_room(room):
     os.system("clear")
     for item in room.items:
-        print(item)
+        print(room.items[item])
 
 
 # Make a new player object that is currently in the 'outside' room.
 player_name = input("Enter a name for your player: ")
 player = Player(player_name, room["outside"])
 
-player.items = [
-    Item("rusty sword", "This sword looks like it hasn't seen use in ages!")
-]
-
-
 os.system("clear")
-
-search_room(player)
 
 # Write a loop that:
 while True:
@@ -117,6 +115,14 @@ while True:
             break
 
         os.system("clear")
+
+        if "add" in user_input:
+            user_input = user_input.split(" ")
+            item_name = user_input[1]
+            player.add_item(player.current_room.items[item_name])
+
+        if user_input == "o":
+            search_room(player)
 
         # If the user enters "search", list all items in the room
         if user_input == "search":
