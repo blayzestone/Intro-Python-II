@@ -37,6 +37,10 @@ room["outside"].items = {
     "shield": Item("shield", "A wooden shield with a gaping hole."),
 }
 
+room["foyer"].items = {
+    "skull": Item("skull", "A human skull."),
+}
+
 # Link rooms together
 
 room["outside"].n_to = room["foyer"]
@@ -57,26 +61,27 @@ def input_parser(error):
     commands = {
         "q": "q",
         "o": "o",
-        "n": "n_to",
-        "s": "s_to",
-        "e": "e_to",
-        "w": "w_to",
+        "n": "n",
+        "s": "s",
+        "e": "e",
+        "w": "w",
         "search": "search",
     }
 
     user_input = input("Enter a command: ")
     user_input = user_input.lower()
 
-    if "add" in user_input:
+    if "add" or "drop" in user_input:
         return user_input
 
     if user_input in commands:
+        print(commands[user_input])
         return commands[user_input]
     else:
         return error
 
 
-def search_room(room):
+def search_items(room):
     os.system("clear")
     for item in room.items:
         print(room.items[item])
@@ -92,10 +97,10 @@ os.system("clear")
 while True:
     error_message = "Command does not exist."
     directions = [
-        "n_to",
-        "s_to",
-        "e_to",
-        "w_to",
+        "n",
+        "s",
+        "e",
+        "w",
     ]
 
     # * Prints the current room name and description
@@ -107,34 +112,42 @@ while True:
 
     if user_input == error_message:
         os.system("clear")
-        print(user_input)
+        print(error_message)
         continue
     else:
+        os.system("clear")
+
+        if user_input in directions:
+            target_room = getattr(player.current_room, f"{user_input}_to")
+
+            # If the user enters a cardinal direction, attempt to move to the room there.
+            if target_room == False:
+                # Print an error message if the movement isn't allowed.
+                print("Dead end. Returning back to previous room...")
+            else:
+                player.current_room = target_room
+
         # If the user enters "q", quit the game.
         if user_input == "q":
             break
 
-        os.system("clear")
+        if user_input == "o":
+            search_items(player)
 
         if "add" in user_input:
             user_input = user_input.split(" ")
             item_name = user_input[1]
             player.add_item(player.current_room.items[item_name])
+            player.current_room.remove_item(item_name)
+            print(f"Picked up {item_name}.")
 
-        if user_input == "o":
-            search_room(player)
+        if "drop" in user_input:
+            user_input = user_input.split(" ")
+            item_name = user_input[1]
+            dropped_item = player.items.pop(item_name)
+            player.current_room.add_item(dropped_item)
+            print(f"Dropped {item_name} on {player.current_room.name} floor.")
 
         # If the user enters "search", list all items in the room
         if user_input == "search":
-            search_room(player.current_room)
-
-        for direction in directions:
-            if direction == user_input:
-                target_room = getattr(player.current_room, user_input)
-
-                # If the user enters a cardinal direction, attempt to move to the room there.
-                if target_room == False:
-                    # Print an error message if the movement isn't allowed.
-                    print("Dead end. Returning back to previous room...")
-                else:
-                    player.current_room = target_room
+            search_items(player.current_room)

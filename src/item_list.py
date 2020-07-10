@@ -3,4 +3,7 @@ class Item_List:
         self.items = items
 
     def add_item(self, item):
-        self.items[item.name] = item
+        self.items[item.name.lower()] = item
+
+    def remove_item(self, item_name):
+        self.items.pop(item_name.lower())
